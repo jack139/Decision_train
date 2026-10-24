@@ -1,0 +1,10 @@
+numpy==2.1.3
+torchao==0.16.0
+torch==2.7.0+cu118
+torchaudio==2.7.0+cu118
+torchvision==0.22.0+cu118
+unsloth==2026.10.8[cu118onlytorch270]
+tokenizers==0.22.2
+trl==0.22.2
+transformers==5.2.0
+causal_conv1d==1.6.1

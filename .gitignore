@@ -50,7 +50,7 @@ htmlcov/
 Thumbs.db
 uv.lock
 
-cache/
+*cache/
 *.lock
 
 data/
