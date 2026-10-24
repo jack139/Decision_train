@@ -1,3 +1,6 @@
+import os
+os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "0"
+
 from unsloth import FastDecisionModel, DecisionTrainer, is_bfloat16_supported
 from datasets import load_dataset
 from transformers import TrainingArguments
