@@ -28,7 +28,6 @@ print(f"Skipped {report['skipped']} of {report['total']} decisions")
 train_items, eval_items = FastDecisionModel.split_holdout(items, seed = 3407)
 print(f"{len(train_items)} training rows, {len(eval_items)} held out")
 
-from transformers import TrainingArguments
 
 trainer = DecisionTrainer(
     model = model,

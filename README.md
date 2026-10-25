@@ -7,3 +7,8 @@ sudo pip3.12 install https://download.pytorch.org/whl/cu118/xformers-0.0.30-cp31
 cd ~/Codes/LLMs/source/unsloth
 sudo pip3.12 install --upgrade --no-cache-dir .
 ```
+
+
+```bash
+UNSLOTH_ENABLE_LOGGING=1 python3.12 test.py
+```
