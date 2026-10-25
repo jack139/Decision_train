@@ -6,7 +6,8 @@ from datasets import load_dataset
 from transformers import TrainingArguments
 
 
-LLM_PATH = "../lm_model/unsloth_Qwen3.5-4B"
+LLM_PATH = "../lm_model/unsloth_Qwen3.5-0.8B"
+#LLM_PATH = "../lm_model/unsloth_Qwen3.5-4B"
 DATASET = "./data/typed-decisions"
 
 # A decision model doesn't write text. It reads an input, looks at the options you give it, and picks one with a probability. FastDecisionModel turns an LLM into one: it adds a small head that reads every question about an input in one pass and scores each option.
@@ -26,9 +27,8 @@ model = FastDecisionModel.get_peft_model(
     random_state = 3407,
 )
 
+
 # Data Prep
-
-
 
 dataset = load_dataset(DATASET, "all", split = "train")
 print(dataset[0]["state"][:500])
@@ -45,9 +45,9 @@ print(f"{len(train_items)} training rows, {len(eval_items)} held out")
 # Let's check accuracy before training. The head is new, so it's about the same as guessing (about 30% accuracy in our runs).
 FastDecisionModel.evaluate(model, tokenizer, eval_items)
 
+
+
 # Train the model
-
-
 
 trainer = DecisionTrainer(
     model = model,
@@ -72,6 +72,7 @@ trainer = DecisionTrainer(
         seed = 3407,
     ),
 )
+
 
 # Show current memory stats
 
@@ -103,6 +104,7 @@ print(f"Peak reserved memory % of max memory = {used_percentage} %.")
 print(f"Peak reserved memory for training % of max memory = {lora_percentage} %.")
 
 
+
 # Inference
 
 FastDecisionModel.calibrate(model, tokenizer, eval_items)
@@ -112,6 +114,7 @@ FastDecisionModel.calibrate(model, tokenizer, eval_items)
 test = load_dataset(DATASET, "all", split = "test")
 test_items, _ = FastDecisionModel.build_dataset(test, tokenizer, model)
 FastDecisionModel.evaluate(model, tokenizer, test_items)
+
 
 # Now let's make some decisions!
 FastDecisionModel.for_inference(model)
@@ -144,6 +147,8 @@ for name, result in answers.items():
 # Saving, loading finetuned models
 model.save_pretrained("qwen_lora")  # Local saving
 # model.push_to_hub("your_name/qwen_lora", token = "YOUR_HF_TOKEN") # Online saving
+
+
 
 # Now if you want to load the model we just saved, set False to True:
 if False:

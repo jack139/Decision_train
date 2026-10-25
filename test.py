@@ -5,7 +5,7 @@ from unsloth import FastDecisionModel, DecisionTrainer, is_bfloat16_supported
 from datasets import load_dataset
 from transformers import TrainingArguments
 
-LLM_PATH = "../lm_model/unsloth_Qwen3.5-4B"
+LLM_PATH = "../lm_model/unsloth_Qwen3.5-0.8B"
 DATASET = "./data/typed-decisions"
 
 model, tokenizer = FastDecisionModel.from_pretrained(
