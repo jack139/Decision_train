@@ -1,6 +1,3 @@
-import os
-os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "0"
-
 from unsloth import FastDecisionModel, DecisionTrainer, is_bfloat16_supported
 from datasets import load_dataset
 from transformers import TrainingArguments
@@ -12,6 +9,7 @@ model, tokenizer = FastDecisionModel.from_pretrained(
     model_name = LLM_PATH,
     max_seq_length = 2048,
     load_in_4bit = True,
+    local_files_only = True,
 )
 
 model = FastDecisionModel.get_peft_model(

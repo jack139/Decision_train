@@ -16,6 +16,7 @@ model, tokenizer = FastDecisionModel.from_pretrained(
     model_name = LLM_PATH,
     max_seq_length = 2048, # Longest input. Long inputs keep the question and options.
     load_in_4bit = True, # 4 bit quantization to reduce memory
+    local_files_only = True,
 )
 
 model = FastDecisionModel.get_peft_model(
@@ -43,7 +44,8 @@ train_items, eval_items = FastDecisionModel.split_holdout(items, seed = 3407)
 print(f"{len(train_items)} training rows, {len(eval_items)} held out")
 
 # Let's check accuracy before training. The head is new, so it's about the same as guessing (about 30% accuracy in our runs).
-FastDecisionModel.evaluate(model, tokenizer, eval_items)
+evaluate = FastDecisionModel.evaluate(model, tokenizer, eval_items)
+print('evaluate before train:', evaluate)
 
 
 
@@ -107,13 +109,15 @@ print(f"Peak reserved memory for training % of max memory = {lora_percentage} %.
 
 # Inference
 
-FastDecisionModel.calibrate(model, tokenizer, eval_items)
+calibrate = FastDecisionModel.calibrate(model, tokenizer, eval_items)
+print('calibrate:', calibrate)
 
 # Let's check accuracy on the dataset's test split, which the model never saw. We got 75% to 78% after 60 steps:
 
 test = load_dataset(DATASET, "all", split = "test")
 test_items, _ = FastDecisionModel.build_dataset(test, tokenizer, model)
-FastDecisionModel.evaluate(model, tokenizer, test_items)
+evaluate = FastDecisionModel.evaluate(model, tokenizer, test_items)
+print('evaluate after train:', evaluate)
 
 
 # Now let's make some decisions!
@@ -145,16 +149,14 @@ for name, result in answers.items():
 
 
 # Saving, loading finetuned models
-model.save_pretrained("qwen_lora")  # Local saving
-# model.push_to_hub("your_name/qwen_lora", token = "YOUR_HF_TOKEN") # Online saving
-
+model.save_pretrained("outputs/qwen_lora")  # Local saving
 
 
 # Now if you want to load the model we just saved, set False to True:
 if False:
     from unsloth import FastDecisionModel
     model, tokenizer = FastDecisionModel.from_pretrained(
-        model_name = "qwen_lora", # YOUR MODEL YOU USED FOR TRAINING
+        model_name = "outputs/qwen_lora", # YOUR MODEL YOU USED FOR TRAINING
         max_seq_length = 2048,
         load_in_4bit = True,
     )
@@ -164,7 +166,3 @@ if False:
 # Merge to 16bit
 if False:
     model.save_pretrained_merged("qwen_finetune_16bit", tokenizer, save_method = "merged_16bit",)
-if False: # Pushing to HF Hub
-    model.push_to_hub_merged("HF_USERNAME/qwen_finetune_16bit", tokenizer, save_method = "merged_16bit", token = "YOUR_HF_TOKEN")
-
-
