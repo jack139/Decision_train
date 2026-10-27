@@ -8,7 +8,9 @@ from transformers import TrainingArguments
 
 LLM_PATH = "../lm_model/unsloth_Qwen3.5-0.8B"
 #LLM_PATH = "../lm_model/unsloth_Qwen3.5-4B"
-DATASET = "./data/typed-decisions"
+#DATASET = "./data/typed-decisions"
+train_datefile = "data/QTR/KUAKE-QTR_train.json_decision.json"
+dev_datefile = "data/QTR/KUAKE-QTR_dev.json_decision.json"
 
 # A decision model doesn't write text. It reads an input, looks at the options you give it, and picks one with a probability. FastDecisionModel turns an LLM into one: it adds a small head that reads every question about an input in one pass and scores each option.
 
@@ -31,9 +33,10 @@ model = FastDecisionModel.get_peft_model(
 
 # Data Prep
 
-dataset = load_dataset(DATASET, "all", split = "train")
+#dataset = load_dataset(DATASET, "all", split = "train")
+dataset = json.load(open(train_datefile))
 print(dataset[0]["state"][:500])
-print(json.dumps(json.loads(dataset[0]["questions"]), indent = 2)[:1000])
+print(dataset[0]["questions"][:1000])
 print(dataset[0]["gold"])
 
 
@@ -60,8 +63,8 @@ trainer = DecisionTrainer(
         per_device_train_batch_size = 8,
         gradient_accumulation_steps = 4, # Use GA to mimic batch size!
         warmup_steps = 10,
-        # num_train_epochs = 2, # Set this for 1 full training run.
-        max_steps = 60,
+        num_train_epochs = 1, # Set this for 1 full training run.
+        #max_steps = 60,
         learning_rate = 2e-4,
         lr_scheduler_type = "cosine",
         weight_decay = 0.01,
@@ -114,12 +117,14 @@ print('calibrate:', calibrate)
 
 # Let's check accuracy on the dataset's test split, which the model never saw. We got 75% to 78% after 60 steps:
 
-test = load_dataset(DATASET, "all", split = "test")
+#test = load_dataset(DATASET, "all", split = "test")
+test = json.load(open(dev_datefile))
 test_items, _ = FastDecisionModel.build_dataset(test, tokenizer, model)
 evaluate = FastDecisionModel.evaluate(model, tokenizer, test_items)
 print('evaluate after train:', evaluate)
 
 
+'''
 # Now let's make some decisions!
 FastDecisionModel.for_inference(model)
 answers = FastDecisionModel.predict(
@@ -146,7 +151,7 @@ answers = FastDecisionModel.predict(
 )
 for name, result in answers.items():
     print(name, result["answer"], {k: round(v, 3) for k, v in result["probabilities"].items()})
-
+'''
 
 # Saving, loading finetuned models
 model.save_pretrained("outputs/qwen_lora")  # Local saving

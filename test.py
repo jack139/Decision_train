@@ -1,9 +1,11 @@
+import json
 from unsloth import FastDecisionModel, DecisionTrainer, is_bfloat16_supported
 from datasets import load_dataset
 from transformers import TrainingArguments
 
 LLM_PATH = "../lm_model/unsloth_Qwen3.5-0.8B"
-DATASET = "./data/typed-decisions"
+#DATASET = "./data/typed-decisions"
+train_datefile = "data/QTR/KUAKE-QTR_dev.json_decision.json"
 
 model, tokenizer = FastDecisionModel.from_pretrained(
     model_name = LLM_PATH,
@@ -21,7 +23,9 @@ model = FastDecisionModel.get_peft_model(
     random_state = 3407,
 )
 
-dataset = load_dataset(DATASET, "all", split = "train")
+
+#dataset = load_dataset(DATASET, "all", split = "train")
+dataset = json.load(open(train_datefile))
 items, report = FastDecisionModel.build_dataset(dataset, tokenizer, model)
 print(f"Skipped {report['skipped']} of {report['total']} decisions")
 
